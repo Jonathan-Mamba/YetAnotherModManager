@@ -1,6 +1,4 @@
-import view
-import model
-
+from src import view, model
 
 
 def main():

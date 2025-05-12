@@ -108,7 +108,8 @@ class CommandLineView(View):
         return ""
 
     def remove(self, args: argparse.Namespace) -> str:
-        return f"remove command executed"
+        self.model.remove_group(args.group)
+        return f"Group {args.group} was removed successfully."
 
     def edit(self, args: argparse.Namespace) -> str:
         return "edit command ran"

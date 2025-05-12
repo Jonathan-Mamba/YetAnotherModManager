@@ -1,3 +1,4 @@
+import argparse
 import os
 import abc
 import util
@@ -38,6 +39,14 @@ class Model(abc.ABC):
             raise ArgumentError(None, f"The only valid modloaders are {util.modloaders}, not {group['mod_loader']}")
 
         self._config_dict["groups"].append(group)
+        self.names_set.add(group['name'])
+
+    def remove_group(self, group_name: str):
+        if not group_name in self.names_set:
+            raise argparse.ArgumentError(None, f"{group_name} was not found")
+
+        self._config_dict['groups'] = [i for i in self._config_dict['groups'] if i['name'] != group_name]
+        self.names_set.remove(group_name)
 
     @abc.abstractmethod
     def save(self) -> None:
