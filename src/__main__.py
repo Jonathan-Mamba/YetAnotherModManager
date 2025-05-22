@@ -1,8 +1,11 @@
-from src import view, model
+import typer
+
+from src.view.cli import run_cli
 
 
 def main():
-    view.CommandLineView(model.LinuxModel()).run()
+    run_cli()
+
 
 if __name__ == "__main__":
     main()

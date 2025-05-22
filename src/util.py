@@ -1,6 +1,8 @@
 from typing import TypedDict, Literal
 
+
 modloaders: tuple[str, str, str, str] = "fabric", "forge", "neoforge", "quilt"
+
 
 class ModGroup(TypedDict):
     mod_loader: Literal["fabric", "forge", "neoforge", "quilt"]
@@ -10,6 +12,16 @@ class ModGroup(TypedDict):
 
 class ConfigFile(TypedDict):
     groups: list[ModGroup]
+
+
+
+class MetaSingleton(type):
+    __instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls.__instances.keys():
+            cls.__instances[cls] = super().__call__(*args, **kwargs)
+        return cls.__instances[cls]
+
 
 if __name__ == '__main__':
     import pynput
