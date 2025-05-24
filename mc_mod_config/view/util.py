@@ -1,11 +1,11 @@
-import typer
-from typing import Self
-from src.model import get_model
-from src import util
-import pynput
 import colorama
+import pynput
+import typer
 
-class App(typer.Typer, metaclass=util.MetaSingleton):
+from ..util import MetaSingleton
+
+
+class App(typer.Typer, metaclass=MetaSingleton):
     """
     Singleton class that contains a reference to the app
     """

@@ -1,24 +1,14 @@
 import abc
-import argparse
 import os
 from src import util
 import json
 import getpass
-from argparse import ArgumentError
 from typing import Iterator, Protocol
 
 
 class SystemStrategy(Protocol):
     @abc.abstractmethod
     def get_config_file_path(self) -> str:
-        pass
-
-    @abc.abstractmethod
-    def save(self, data: util.ConfigFile) -> None:
-        pass
-
-    @abc.abstractmethod
-    def clear_screen(self) -> None:
         pass
 
 
@@ -47,16 +37,18 @@ class Model(metaclass=util.MetaSingleton):
 
     def add_group(self, group: util.ModGroup) -> None:
         if group["name"] in self.names_set:
-            raise ArgumentError(None, f"name {group['name']} is already used")
+            raise ValueError(f"name {group['name']} is already used")
         elif group["mod_loader"] not in util.modloaders:
-            raise ArgumentError(None, f"The only valid modloaders are {util.modloaders}, not {group['mod_loader']}")
+            raise ValueError(f"The only valid modloaders are {util.modloaders}, not {group['mod_loader']}")
+        elif (is_valid := self.check_group_validity(group)) and is_valid[0]:
+            raise ValueError(is_valid[1])
 
         self._config_dict["groups"].append(group)
         self.names_set.add(group['name'])
 
     def remove_group(self, group_name: str):
         if not group_name in self.names_set:
-            raise argparse.ArgumentError(None, f"{group_name} was not found")
+            raise ValueError(None, f"{group_name} was not found")
 
         self._config_dict['groups'] = [i for i in self._config_dict['groups'] if i['name'] != group_name]
         self.names_set.remove(group_name)
@@ -65,7 +57,8 @@ class Model(metaclass=util.MetaSingleton):
         return self._system_strategy.get_config_file_path()
 
     def save(self) -> None:
-        self._system_strategy.save(self._config_dict)
+        with open(self.get_config_file_path(), "w") as f:
+            f.write(json.dumps(self._config_dict, indent=2))
 
     def clear_screen(self):
         self._system_strategy.clear_screen()
@@ -74,13 +67,6 @@ class Model(metaclass=util.MetaSingleton):
 class LinuxStategy(SystemStrategy):
     def get_config_file_path(self) -> str:
         return f"/home/{getpass.getuser()}/.config/minecraft-mod-config.json"
-
-    def save(self, data: util.ConfigFile) -> None:
-        with open(self.get_config_file_path(), "w") as f:
-            f.write(json.dumps(data, indent=2))
-
-    def clear_screen(self):
-        os.system("clear")
 
 
 def get_model() -> Model:
