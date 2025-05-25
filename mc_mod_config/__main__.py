@@ -1,5 +1,3 @@
-import typer
-
 from mc_mod_config.view.util import App
 
 

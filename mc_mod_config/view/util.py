@@ -1,6 +1,6 @@
-import colorama
 import pynput
 import typer
+import colorama
 
 from ..util import MetaSingleton
 

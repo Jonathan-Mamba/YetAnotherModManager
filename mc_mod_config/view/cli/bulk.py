@@ -1,7 +1,6 @@
-from src.model import get_model
-from src.util import ModGroup
-from src.view.util import Stream
-from typing import Literal
+from mc_mod_config.model import get_model
+from mc_mod_config.util import ModGroup
+from mc_mod_config.view.util import Stream
 import typer
 
 

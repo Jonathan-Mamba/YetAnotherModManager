@@ -1,7 +1,6 @@
 import typer
-from src.view.util import App
-from src.view.cli import bulk
-from typing import Annotated
+from mc_mod_config.view.util import App
+from mc_mod_config.view.cli import bulk
 
 """
 Remaining:
@@ -12,7 +11,6 @@ Remaining:
 
 app = App()
 app2 = App()
-print(app2 == app)
 
 
 @app.command(name="list", help="Lists all local groups")

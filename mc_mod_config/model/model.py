@@ -1,8 +1,8 @@
 import abc
 import os
-from src import util
 import json
 import getpass
+from mc_mod_config import util
 from typing import Iterator, Protocol
 
 
@@ -40,7 +40,7 @@ class Model(metaclass=util.MetaSingleton):
             raise ValueError(f"name {group['name']} is already used")
         elif group["mod_loader"] not in util.modloaders:
             raise ValueError(f"The only valid modloaders are {util.modloaders}, not {group['mod_loader']}")
-        elif (is_valid := self.check_group_validity(group)) and is_valid[0]:
+        elif (is_valid := util.check_group_validity(group)) and is_valid[0]:
             raise ValueError(is_valid[1])
 
         self._config_dict["groups"].append(group)
