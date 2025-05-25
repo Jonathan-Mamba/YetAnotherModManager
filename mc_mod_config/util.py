@@ -30,7 +30,7 @@ minecraft_versions: set[str] = {
 
 
 class ModGroup(TypedDict):
-    mod_loader: Literal["fabric", "forge", "neoforge", "quilt"]
+    mod_loader: str
     version: str
     name: str
     mods: list[str]
@@ -39,16 +39,16 @@ class ConfigFile(TypedDict):
     groups: list[ModGroup]
 
 
-def check_group_validity(group: ModGroup) -> tuple[bool, str]:
+def check_group_validity(group: ModGroup, no_loader: bool = False) -> tuple[bool, str]:
     """
     Checks the validity of a group
     :param group: group to be checked
     :return: (True, "") if the group is valid else (False, <message>)
     """
-    if group['name'].strip() not in minecraft_versions:
-        return False, f"version '{group['name']}' is not valid"
+    if group['version'].strip() not in minecraft_versions:
+        return False, f"version '{group['version']}' is not valid"
 
-    if group['mod_loader'].strip() not in modloaders:
+    if (not no_loader) and group['mod_loader'].strip() not in modloaders:
         return False, f"only valid mod loaders are {modloaders}, not '{group['mod_loader']}'"
 
     return True, ""
@@ -63,26 +63,4 @@ class MetaSingleton(type):
 
 
 if __name__ == '__main__':
-    import pynput
-    import time
-    pressed = False
-    stop = False
-    def on_press(key):
-        global pressed, stop
-        if key == pynput.keyboard.Key.shift_l:
-            pressed = True
-        if key == pynput.keyboard.KeyCode.from_char("q"):
-            stop = True
-
-
-
-    listener = pynput.keyboard.Listener(on_press)
-    listener.start()
-    while True:
-        if pressed:
-            print(f"\rline\nmessa", end="")
-            pressed = False
-        if stop:
-            print("\r ")
-            break
-    print("q")
+    print({"a":1} | {"a":2})

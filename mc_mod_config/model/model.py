@@ -37,21 +37,48 @@ class Model(metaclass=util.MetaSingleton):
 
     def add_group(self, group: util.ModGroup) -> None:
         if group["name"] in self.names_set:
-            raise ValueError(f"name {group['name']} is already used")
-        elif group["mod_loader"] not in util.modloaders:
-            raise ValueError(f"The only valid modloaders are {util.modloaders}, not {group['mod_loader']}")
-        elif (is_valid := util.check_group_validity(group)) and is_valid[0]:
+            raise ValueError(f"name '{group['name']}' is already used")
+        elif (is_valid := util.check_group_validity(group)) and not is_valid[0]:
             raise ValueError(is_valid[1])
 
         self._config_dict["groups"].append(group)
         self.names_set.add(group['name'])
 
+    def get_group(self, group_name: str):
+        for group in self.get_groups():
+            if group['name'] == group_name:
+                return group
+        raise ValueError(f"Group '{group_name}' was not found")
+
     def remove_group(self, group_name: str):
         if not group_name in self.names_set:
-            raise ValueError(None, f"{group_name} was not found")
+            raise ValueError(None, f"Group '{group_name}' was not found")
 
         self._config_dict['groups'] = [i for i in self._config_dict['groups'] if i['name'] != group_name]
         self.names_set.remove(group_name)
+
+    def edit_group(self, group_name: str, new_name: str, new_loader: str, new_version: str, force: bool = False):
+        if group_name not in self.names_set:
+            raise ValueError(f"'{group_name}' was not found")
+
+        is_valid = util.check_group_validity(util.ModGroup(name=new_name, mod_loader=new_loader, version=new_version, mods=[]), no_loader=True)
+        if not is_valid[0]:
+            raise ValueError(is_valid[1])
+
+        if (not force) and (new_name in self.names_set):
+            raise ValueError(f"'{new_name}' is already being used")
+
+        if (force) and (new_name in self.names_set):
+            self.remove_group(new_name)
+
+        group = self.get_group(group_name)
+        group['name'] = new_name if new_name else group['name']
+        group['mod_loader'] = new_loader if new_loader else group['mod_loader']
+        group['version'] = new_version if new_version else group['version']
+
+
+
+
 
     def get_config_file_path(self) -> str:
         return self._system_strategy.get_config_file_path()

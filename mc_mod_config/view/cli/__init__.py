@@ -28,9 +28,9 @@ def list_groups() -> None:
 
 @app.command(help="Adds a new group without any mods", no_args_is_help=True)
 def add(
-        name: Annotated[str, typer.Argument("Name of the created group")],
-        loader: Annotated[str, typer.Argument("Mod loader of the created group")],
-        version: Annotated[str, typer.Argument("Version of the created group")]
+        name: Annotated[str, typer.Argument(help="Name of the created group")],
+        loader: Annotated[str, typer.Argument(help="Mod loader of the created group")],
+        version: Annotated[str, typer.Argument(help="Version of the created group")]
 ) -> None:
     try:
         bulk.add(name, loader, version)
@@ -56,6 +56,12 @@ def edit(
         group: Annotated[str, typer.Argument(help="Name of the edited group")],
         name: Annotated[str, typer.Option(help="New name of the group")] = "",
         loader: Annotated[str, typer.Option(help="New mod loader of the group")] = "",
-        version: Annotated[str, typer.Option(help="New version of the group")] = ""
+        version: Annotated[str, typer.Option(help="New version of the group")] = "",
+        force: Annotated[bool, typer.Option(help="Override existing group if the new name is already used")] = False
 ) -> None:
-    bulk.edit(group, name, loader, version)
+    try:
+        bulk.edit(group, name, loader, version, force)
+    except ValueError as e:
+        typer.echo(f"ERROR: {e}")
+    else:
+        typer.echo(f"Group '{group}' was modified successfully.")
