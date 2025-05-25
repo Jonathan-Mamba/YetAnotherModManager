@@ -1,6 +1,7 @@
 import typer
-from mc_mod_config.view.util import App
+from typing import Annotated
 from mc_mod_config.view.cli import bulk
+from mc_mod_config.util import MetaSingleton
 
 """
 Remaining:
@@ -9,9 +10,15 @@ Remaining:
     - install
 """
 
-app = App()
-app2 = App()
+class App(typer.Typer, metaclass=MetaSingleton):
+    """
+    Singleton class that contains a reference to the app
+    """
+    def __init__(self):
+        super().__init__(no_args_is_help=True)
 
+
+app = App()
 
 @app.command(name="list", help="Lists all local groups")
 def list_groups() -> None:
@@ -20,7 +27,11 @@ def list_groups() -> None:
 
 
 @app.command(help="Adds a new group without any mods", no_args_is_help=True)
-def add(name: str, loader: str, version: str):
+def add(
+        name: Annotated[str, typer.Argument("Name of the created group")],
+        loader: Annotated[str, typer.Argument("Mod loader of the created group")],
+        version: Annotated[str, typer.Argument("Version of the created group")]
+) -> None:
     try:
         bulk.add(name, loader, version)
     except ValueError as e:
@@ -31,7 +42,7 @@ def add(name: str, loader: str, version: str):
 
 
 @app.command(help="Removes a local group (permanent)", no_args_is_help=True)
-def remove(name: str):
+def remove(name: Annotated[str, typer.Argument(help="Name of the group")]):
     try:
         bulk.remove(name)
     except ValueError as e:
@@ -41,12 +52,10 @@ def remove(name: str):
 
 
 @app.command(help="Edits properties of a group", no_args_is_help=True)
-def edit(group: str, name: str = "", loader: str = "", version: str = "") -> None:
-    """
-    Edits properties of a group
-    :param group: name of the edited group
-    :param name: new name of the group
-    :param loader: new loader of the group
-    :param version: new version of the group
-    """
+def edit(
+        group: Annotated[str, typer.Argument(help="Name of the edited group")],
+        name: Annotated[str, typer.Option(help="New name of the group")] = "",
+        loader: Annotated[str, typer.Option(help="New mod loader of the group")] = "",
+        version: Annotated[str, typer.Option(help="New version of the group")] = ""
+) -> None:
     bulk.edit(group, name, loader, version)

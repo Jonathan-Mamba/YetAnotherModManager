@@ -5,12 +5,7 @@ import colorama
 from ..util import MetaSingleton
 
 
-class App(typer.Typer, metaclass=MetaSingleton):
-    """
-    Singleton class that contains a reference to the app
-    """
-    def __init__(self):
-        super().__init__(no_args_is_help=True)
+
 
 
 

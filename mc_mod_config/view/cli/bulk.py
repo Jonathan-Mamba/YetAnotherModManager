@@ -27,5 +27,5 @@ def list_groups() -> None:
             if finished:
                 return
 
-def edit(group: str, name: str, loader: str, version: str) -> None:
+def edit(group: str, name: str = "", loader: str = "", version: str = "") -> None:
     pass

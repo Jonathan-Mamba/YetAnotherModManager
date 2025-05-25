@@ -20,14 +20,14 @@ class Model(metaclass=util.MetaSingleton):
             if not os.path.exists(os.path.dirname(self.get_config_file_path())):
                 os.makedirs(os.path.dirname(self.get_config_file_path()))
             with open(self.get_config_file_path(), "a") as f:
-                f.write("""{"groups":[]}""")
+                f.write(json.dumps(util.ConfigFile(groups=[])))
 
         with open(self.get_config_file_path(), "r") as f:
             try:
                 self._config_dict: util.ConfigFile = json.loads(f.read())
             except json.decoder.JSONDecodeError:
                 with open(self.get_config_file_path(), "a") as f:
-                    f.write("""{"groups":[]}""")
+                    f.write(json.dumps(util.ConfigFile(groups=[])))
                 self._config_dict: util.ConfigFile = {"groups": []}
 
         self.names_set: set[str] = {i.get("name") for i in self._config_dict["groups"]}
@@ -59,9 +59,6 @@ class Model(metaclass=util.MetaSingleton):
     def save(self) -> None:
         with open(self.get_config_file_path(), "w") as f:
             f.write(json.dumps(self._config_dict, indent=2))
-
-    def clear_screen(self):
-        self._system_strategy.clear_screen()
 
 
 class LinuxStategy(SystemStrategy):
