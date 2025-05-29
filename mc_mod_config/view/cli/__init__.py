@@ -5,8 +5,6 @@ from mc_mod_config.util import MetaSingleton
 
 """
 Remaining:
-    - edit
-    - search
     - install
 """
 
@@ -51,6 +49,7 @@ def remove(name: Annotated[str, typer.Argument(help="Name of the group")]):
         typer.echo(f"Group '{name}' was removed successfully.")
 
 
+
 @app.command(help="Edits properties of a group", no_args_is_help=True)
 def edit(
         group: Annotated[str, typer.Argument(help="Name of the edited group")],
@@ -65,3 +64,25 @@ def edit(
         typer.echo(f"ERROR: {e}")
     else:
         typer.echo(f"Group '{group}' was modified successfully.")
+
+
+
+@app.command(help="Search a mod using the modrinth api", no_args_is_help=True)
+def search(
+        query: Annotated[str, typer.Argument(help="Name of the searched mod")],
+        index: Annotated[str, typer.Option(help="Sorting method of the results ('relevance', 'downloads', 'follows', 'newest', 'updated')")] = 'relevance',
+        offset: Annotated[int, typer.Option(help="The offset into the search. Skips this number of results")] = 0,
+        limit: Annotated[int, typer.Option(help="The number of results returned by the search. must be <= 100")] = 10
+):
+    try:
+        bulk.search(query, index, offset, limit)
+    except ValueError as e:
+        typer.echo(e)
+
+
+
+@app.command(help="Installs a group into a folder. Does not check for other files")
+def install(
+        group: Annotated[str, typer.Argument("The name of the installed group")],
+        folder: Annotated[str, typer.Argument("The folder where the group will be installed")]
+)

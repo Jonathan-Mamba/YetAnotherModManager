@@ -12,7 +12,7 @@ class SystemStrategy(Protocol):
         pass
 
 
-class Model(metaclass=util.MetaSingleton):
+class GroupModel(metaclass=util.MetaSingleton):
     def __init__(self, system_strategy: SystemStrategy):
         self._system_strategy = system_strategy
 
@@ -76,10 +76,6 @@ class Model(metaclass=util.MetaSingleton):
         group['mod_loader'] = new_loader if new_loader else group['mod_loader']
         group['version'] = new_version if new_version else group['version']
 
-
-
-
-
     def get_config_file_path(self) -> str:
         return self._system_strategy.get_config_file_path()
 
@@ -93,7 +89,7 @@ class LinuxStategy(SystemStrategy):
         return f"/home/{getpass.getuser()}/.config/minecraft-mod-config.json"
 
 
-def get_model() -> Model:
+def get_group_model() -> GroupModel:
     """:returns the correct model corresponding to the platform"""
-    try: return Model()
-    except TypeError: return Model(LinuxStategy())
+    try: return GroupModel()
+    except TypeError: return GroupModel(LinuxStategy())

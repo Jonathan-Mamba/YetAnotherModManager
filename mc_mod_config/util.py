@@ -1,6 +1,10 @@
 from typing import TypedDict, Literal
 
 
+class CommandError(ValueError): pass
+
+api_path: str = "api.modrinth.com"
+
 modloaders: tuple[str, str, str, str] = "fabric", "forge", "neoforge", "quilt"
 
 minecraft_versions: set[str] = {
