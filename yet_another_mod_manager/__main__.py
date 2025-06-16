@@ -1,4 +1,4 @@
-from mc_mod_config.view.cli import App
+from yet_another_mod_manager.view.cli import App
 
 def main():
     App()()

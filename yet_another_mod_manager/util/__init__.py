@@ -39,6 +39,37 @@ class ModGroup(TypedDict):
     name: str
     mods: list[str]
 
+    def get_name(self) -> str:
+        if (x := self.get('name')) and x is None:
+            raise AttributeError("ModGroup does not have a name")
+        return x
+
+    @property
+    def mod_loader(self) -> str:
+        if (x := self.get('mod_loader')) and x is None:
+            raise AttributeError("ModGroup does not have a modloader")
+        return x
+
+    @property
+    def version(self) -> str:
+        if (x := self.get('version')) and x is None:
+            raise AttributeError("ModGroup does not have a version")
+        return x
+
+    @property
+    def name(self) -> str:
+        if (x := self.get('name')) and x is None:
+            raise AttributeError("ModGroup does not have a name")
+        return x
+
+    @property
+    def mods(self) -> str:
+        if (x := self.get('mods')) and x is None:
+            raise AttributeError("ModGroup does not have mods")
+        return x
+
+
+
 class ConfigFile(TypedDict):
     groups: list[ModGroup]
 
@@ -67,4 +98,4 @@ class MetaSingleton(type):
 
 
 if __name__ == '__main__':
-    print({"a":1} | {"a":2})
+    pass

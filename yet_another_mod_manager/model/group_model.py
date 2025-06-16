@@ -2,7 +2,9 @@ import abc
 import os
 import json
 import getpass
-from mc_mod_config import util
+import pathlib
+
+from yet_another_mod_manager import util
 from typing import Iterator, Protocol
 
 
@@ -78,6 +80,9 @@ class GroupModel(metaclass=util.MetaSingleton):
 
     def get_config_file_path(self) -> str:
         return self._system_strategy.get_config_file_path()
+
+    def install_group(self, group: str, folder: pathlib.Path):
+        pass
 
     def save(self) -> None:
         with open(self.get_config_file_path(), "w") as f:

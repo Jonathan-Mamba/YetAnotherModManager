@@ -1,7 +1,8 @@
 import typer
+import pathlib
 from typing import Annotated
-from mc_mod_config.view.cli import bulk
-from mc_mod_config.util import MetaSingleton
+from yet_another_mod_manager.view.cli import bulk
+from yet_another_mod_manager.util import MetaSingleton, enums
 
 """
 Remaining:
@@ -18,17 +19,20 @@ class App(typer.Typer, metaclass=MetaSingleton):
 
 app = App()
 
-@app.command(name="list", help="Lists all local groups")
+@app.command(name="list", help="Lists all local groups.")
 def list_groups() -> None:
     bulk.list_groups()
 
+@app.command(name="print", help="Prints the data of a group.", no_args_is_help=True)
+def print_group(group: Annotated[str, typer.Argument(help="Name of the group.")]):
+    bulk.print_group(group)
 
 
-@app.command(help="Adds a new group without any mods", no_args_is_help=True)
+@app.command(help="Adds a new group without any mods.", no_args_is_help=True)
 def add(
         name: Annotated[str, typer.Argument(help="Name of the created group")],
-        loader: Annotated[str, typer.Argument(help="Mod loader of the created group")],
-        version: Annotated[str, typer.Argument(help="Version of the created group")]
+        loader: Annotated[enums.ModLoader, typer.Argument(help="Mod loader of the created group")],
+        version: Annotated[enums.MinecraftVersion, typer.Argument(help="Version of the created group")]
 ) -> None:
     try:
         bulk.add(name, loader, version)
@@ -39,7 +43,7 @@ def add(
 
 
 
-@app.command(help="Removes a local group (permanent)", no_args_is_help=True)
+@app.command(help="Removes a local group (permanent).", no_args_is_help=True)
 def remove(name: Annotated[str, typer.Argument(help="Name of the group")]):
     try:
         bulk.remove(name)
@@ -50,16 +54,13 @@ def remove(name: Annotated[str, typer.Argument(help="Name of the group")]):
 
 
 
-@app.command(help="Edits properties of a group", no_args_is_help=True)
+@app.command(help="Edits properties of a group.", no_args_is_help=True)
 def edit(
         group: Annotated[str, typer.Argument(help="Name of the edited group")],
-        name: Annotated[str, typer.Option(help="New name of the group")] = "",
-        loader: Annotated[str, typer.Option(help="New mod loader of the group")] = "",
-        version: Annotated[str, typer.Option(help="New version of the group")] = "",
         force: Annotated[bool, typer.Option(help="Override existing group if the new name is already used")] = False
 ) -> None:
     try:
-        bulk.edit(group, name, loader, version, force)
+        bulk.edit(group, force)
     except ValueError as e:
         typer.echo(f"ERROR: {e}")
     else:
@@ -67,10 +68,10 @@ def edit(
 
 
 
-@app.command(help="Search a mod using the modrinth api", no_args_is_help=True)
+@app.command(help="Searches a mod using the modrinth api.", no_args_is_help=True)
 def search(
         query: Annotated[str, typer.Argument(help="Name of the searched mod")],
-        index: Annotated[str, typer.Option(help="Sorting method of the results ('relevance', 'downloads', 'follows', 'newest', 'updated')")] = 'relevance',
+        index: Annotated[enums.ModrinthSearchIndex, typer.Option(help="Sorting method of the results ('relevance', 'downloads', 'follows', 'newest', 'updated')")] = 'relevance',
         offset: Annotated[int, typer.Option(help="The offset into the search. Skips this number of results")] = 0,
         limit: Annotated[int, typer.Option(help="The number of results returned by the search. must be <= 100")] = 10
 ):
@@ -81,8 +82,16 @@ def search(
 
 
 
-@app.command(help="Installs a group into a folder. Does not check for other files")
+@app.command(help="Installs a group into a folder. Does not check for other files.", no_args_is_help=True)
 def install(
-        group: Annotated[str, typer.Argument("The name of the installed group")],
-        folder: Annotated[str, typer.Argument("The folder where the group will be installed")]
-)
+        group: Annotated[str, typer.Argument(help="The name of the installed group")],
+        folder: Annotated[pathlib.Path, typer.Argument(help="The folder where the group will be installed", resolve_path=True, exists=True, dir_okay=True, writable=True)]
+):
+    typer.echo("Not implemented yet.")
+
+
+
+@app.command(help="Launch the graphical interface")
+def gui() -> None:
+    typer.echo("Not implemented yet.")
+    

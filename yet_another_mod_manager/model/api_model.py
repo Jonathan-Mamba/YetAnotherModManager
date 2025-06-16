@@ -1,5 +1,5 @@
 import requests
-from mc_mod_config.util import MetaSingleton
+from yet_another_mod_manager.util import MetaSingleton
 
 class ApiModel(metaclass=MetaSingleton):
     def __init__(self):
