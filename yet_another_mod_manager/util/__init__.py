@@ -1,9 +1,6 @@
-from typing import TypedDict, Literal
 
 
 class CommandError(ValueError): pass
-
-api_path: str = "api.modrinth.com"
 
 modloaders: tuple[str, str, str, str] = "fabric", "forge", "neoforge", "quilt"
 
@@ -31,62 +28,6 @@ minecraft_versions: set[str] = {
     "1.20", "1.20.1", "1.20.2", "1.20.3", "1.20.4", "1.20.5", "1.20.6",
     "1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4", "1.21.5"
 }
-
-
-class ModGroup(TypedDict):
-    mod_loader: str
-    version: str
-    name: str
-    mods: list[str]
-
-    def get_name(self) -> str:
-        if (x := self.get('name')) and x is None:
-            raise AttributeError("ModGroup does not have a name")
-        return x
-
-    @property
-    def mod_loader(self) -> str:
-        if (x := self.get('mod_loader')) and x is None:
-            raise AttributeError("ModGroup does not have a modloader")
-        return x
-
-    @property
-    def version(self) -> str:
-        if (x := self.get('version')) and x is None:
-            raise AttributeError("ModGroup does not have a version")
-        return x
-
-    @property
-    def name(self) -> str:
-        if (x := self.get('name')) and x is None:
-            raise AttributeError("ModGroup does not have a name")
-        return x
-
-    @property
-    def mods(self) -> str:
-        if (x := self.get('mods')) and x is None:
-            raise AttributeError("ModGroup does not have mods")
-        return x
-
-
-
-class ConfigFile(TypedDict):
-    groups: list[ModGroup]
-
-
-def check_group_validity(group: ModGroup, no_loader: bool = False) -> tuple[bool, str]:
-    """
-    Checks the validity of a group
-    :param group: group to be checked
-    :return: (True, "") if the group is valid else (False, <message>)
-    """
-    if group['version'].strip() not in minecraft_versions:
-        return False, f"version '{group['version']}' is not valid"
-
-    if (not no_loader) and group['mod_loader'].strip() not in modloaders:
-        return False, f"only valid mod loaders are {modloaders}, not '{group['mod_loader']}'"
-
-    return True, ""
 
 
 class MetaSingleton(type):

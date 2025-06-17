@@ -1,10 +1,13 @@
 import abc
 import os
 import json
+import marshmallow
 import getpass
 import pathlib
-
-from yet_another_mod_manager import util
+from yet_another_mod_manager.config import ModGroup, ConfigFile
+from yet_another_mod_manager.util import MetaSingleton
+from yet_another_mod_manager.util.enums import ModLoader, MinecraftVersion
+from yet_another_mod_manager.util.group import is_valid_group
 from typing import Iterator, Protocol
 
 
@@ -14,41 +17,47 @@ class SystemStrategy(Protocol):
         pass
 
 
-class GroupModel(metaclass=util.MetaSingleton):
+class GroupModel(metaclass=MetaSingleton):
     def __init__(self, system_strategy: SystemStrategy):
         self._system_strategy = system_strategy
+        self._config_file: ConfigFile = ConfigFile.empty()
+        self.load()
 
+        self.names_set: set[str] = {i.name for i in self.config_file.groups}
+
+    @property
+    def config_file(self) -> ConfigFile:
+        return self._config_file
+
+    def load(self):
+        # making sure that the config file does exists
         if not os.path.exists(self.get_config_file_path()):
             if not os.path.exists(os.path.dirname(self.get_config_file_path())):
                 os.makedirs(os.path.dirname(self.get_config_file_path()))
             with open(self.get_config_file_path(), "a") as f:
-                f.write(json.dumps(util.ConfigFile(groups=[])))
+                f.write(json.dumps(ConfigFile(groups=[])))
 
-        with open(self.get_config_file_path(), "r") as f:
+        with open(self.get_config_file_path(), 'r') as f:
             try:
-                self._config_dict: util.ConfigFile = json.loads(f.read())
-            except json.decoder.JSONDecodeError:
-                with open(self.get_config_file_path(), "a") as f:
-                    f.write(json.dumps(util.ConfigFile(groups=[])))
-                self._config_dict: util.ConfigFile = {"groups": []}
+                self._config_file = ConfigFile.schema().loads(f.read())
+            except json.decoder.JSONDecodeError or marshmallow.exceptions.ValidationError:
+                pass
 
-        self.names_set: set[str] = {i.get("name") for i in self._config_dict["groups"]}
+    def get_groups(self) -> Iterator[ModGroup]:
+        return (i for i in self.config_file.groups)
 
-    def get_groups(self) -> Iterator[util.ModGroup]:
-        return (i for i in self._config_dict["groups"])
-
-    def add_group(self, group: util.ModGroup) -> None:
-        if group["name"] in self.names_set:
-            raise ValueError(f"name '{group['name']}' is already used")
-        elif (is_valid := util.check_group_validity(group)) and not is_valid[0]:
+    def add_group(self, group: ModGroup) -> None:
+        if group.name in self.names_set:
+            raise ValueError(f"name '{group.name}' is already used")
+        elif (is_valid := is_valid_group(group)) and not is_valid[0]:
             raise ValueError(is_valid[1])
 
-        self._config_dict["groups"].append(group)
-        self.names_set.add(group['name'])
+        self.config_file.groups.append(group)
+        self.names_set.add(group.name)
 
-    def get_group(self, group_name: str):
+    def get_group(self, group_name: str) -> ModGroup:
         for group in self.get_groups():
-            if group['name'] == group_name:
+            if group.name == group_name:
                 return group
         raise ValueError(f"Group '{group_name}' was not found")
 
@@ -56,14 +65,14 @@ class GroupModel(metaclass=util.MetaSingleton):
         if not group_name in self.names_set:
             raise ValueError(None, f"Group '{group_name}' was not found")
 
-        self._config_dict['groups'] = [i for i in self._config_dict['groups'] if i['name'] != group_name]
+        self.config_file.groups = [i for i in self.config_file.groups if i.name != group_name]
         self.names_set.remove(group_name)
 
-    def edit_group(self, group_name: str, new_name: str, new_loader: str, new_version: str, force: bool = False):
+    def edit_group(self, group_name: str, new_name: str, new_loader: ModLoader, new_version: MinecraftVersion, force: bool = False):
         if group_name not in self.names_set:
             raise ValueError(f"'{group_name}' was not found")
 
-        is_valid = util.check_group_validity(util.ModGroup(name=new_name, mod_loader=new_loader, version=new_version, mods=[]), no_loader=True)
+        is_valid = is_valid_group(ModGroup(name=new_name, mod_loader=new_loader, version=new_version, mods=[]), no_loader=True)
         if not is_valid[0]:
             raise ValueError(is_valid[1])
 
@@ -74,9 +83,9 @@ class GroupModel(metaclass=util.MetaSingleton):
             self.remove_group(new_name)
 
         group = self.get_group(group_name)
-        group['name'] = new_name if new_name else group['name']
-        group['mod_loader'] = new_loader if new_loader else group['mod_loader']
-        group['version'] = new_version if new_version else group['version']
+        group.name = new_name if new_name else group.name
+        group.name = new_loader if new_loader else group.mod_loader
+        group.version = new_version if new_version else group.version
 
     def get_config_file_path(self) -> str:
         return self._system_strategy.get_config_file_path()
@@ -86,7 +95,7 @@ class GroupModel(metaclass=util.MetaSingleton):
 
     def save(self) -> None:
         with open(self.get_config_file_path(), "w") as f:
-            f.write(json.dumps(self._config_dict, indent=2))
+            f.write(self.config_file.to_json())
 
 
 class LinuxStategy(SystemStrategy):
