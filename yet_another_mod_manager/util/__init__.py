@@ -1,4 +1,5 @@
-
+import os
+import shutil
 
 class CommandError(ValueError): pass
 
@@ -36,6 +37,14 @@ class MetaSingleton(type):
         if cls not in cls.__instances.keys():
             cls.__instances[cls] = super().__call__(*args, **kwargs)
         return cls.__instances[cls]
+
+
+def get_text_editor() -> str:
+    text_editors: tuple[str] = [i for i in (os.environ.get('EDITOR'), 'nano', 'vim', 'notepad') if i if shutil.which(i)]
+    if not text_editors:
+        raise ValueError("could not find a text editor")
+    else:
+        return text_editors[0]
 
 
 if __name__ == '__main__':

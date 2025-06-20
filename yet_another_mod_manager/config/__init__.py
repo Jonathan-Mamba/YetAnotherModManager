@@ -1,7 +1,7 @@
 from dataclasses_json import dataclass_json
 from dataclasses import dataclass
 from yet_another_mod_manager.util.enums import MinecraftVersion, ModLoader
-
+from typing import Self
 
 
 @dataclass_json
@@ -18,6 +18,8 @@ class ModGroup:
 class ConfigFile:
     groups: list[ModGroup]
 
-    @staticmethod
-    def empty() -> 'ConfigFile':
-        return ConfigFile(groups=[])
+    @classmethod
+    def empty(cls) -> Self:
+        return cls(groups=[])
+    
+    

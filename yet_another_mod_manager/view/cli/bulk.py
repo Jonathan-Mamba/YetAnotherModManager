@@ -1,13 +1,16 @@
-import rich.markdown
 import os
+import shutil
 import subprocess
+import rich.markdown
+from rich import box
 from rich.table import Table
 from rich.console import Console
-from rich import box
+from tempfile import NamedTemporaryFile
 from yet_another_mod_manager.model import get_group_model, get_api_model
 from yet_another_mod_manager.config import ModGroup
+from yet_another_mod_manager.util import get_text_editor
 from yet_another_mod_manager.util.enums import ModLoader, MinecraftVersion
-from tempfile import NamedTemporaryFile
+
 
 
 def add(name: str, loader: ModLoader, version: MinecraftVersion):
@@ -35,21 +38,17 @@ def edit(group_name: str, force: bool = False) -> None:
     path: str = ""
     group = get_group_model().get_group(group_name)
     with NamedTemporaryFile('w', delete_on_close=False, delete=False) as f:
-        f.write("[GROUP_INFO]\n")
-        f.write(f"NAME={group.name}\n")
-        f.write(f"LOADER={group.mod_loader}\n")
-        f.write(f"VERSION={group.version}\n\n")
-        f.write("[MODS]\n")
+        f.write(f"name: {group.name}\n")
+        f.write(f"mod_loader: {group.mod_loader}\n")
+        f.write(f"version: {group.version}\n")
+        f.write("mods: \n")
         path = f.name
 
         for mod in group.mods:
-            f.write(f"- {mod}\n")
+            f.write(f"\n\t- {mod}")
 
-    text_editors: list[str] = [os.environ.get(i) for i in ('EDITOR', 'nano', 'vim', 'notepad') if os.environ.get(i) is not None]
-    if not text_editors:
-        raise ValueError("could not find a text editor")
 
-    subprocess.call([text_editors[0], path])
+    subprocess.call([get_text_editor(), path])
 
     #get_group_model().edit_group(group_name, name, loader, version, force)
     get_group_model().save()
@@ -78,3 +77,7 @@ def print_group(group_name: str):
 
     md = rich.markdown.Markdown(group_string)
     Console().print(md)
+
+
+def config():
+    subprocess.call([get_text_editor(), get_group_model().get_config_file_path()])

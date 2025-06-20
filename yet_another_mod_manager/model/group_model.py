@@ -4,11 +4,12 @@ import json
 import marshmallow
 import getpass
 import pathlib
+import platform
+from typing import Iterator, Protocol
 from yet_another_mod_manager.config import ModGroup, ConfigFile
 from yet_another_mod_manager.util import MetaSingleton
 from yet_another_mod_manager.util.enums import ModLoader, MinecraftVersion
 from yet_another_mod_manager.util.group import is_valid_group
-from typing import Iterator, Protocol
 
 
 class SystemStrategy(Protocol):
@@ -32,10 +33,12 @@ class GroupModel(metaclass=MetaSingleton):
     def load(self):
         # making sure that the config file does exists
         if not os.path.exists(self.get_config_file_path()):
+            
             if not os.path.exists(os.path.dirname(self.get_config_file_path())):
                 os.makedirs(os.path.dirname(self.get_config_file_path()))
+            
             with open(self.get_config_file_path(), "a") as f:
-                f.write(json.dumps(ConfigFile(groups=[])))
+                f.write(json.dumps(ConfigFile.empty().to_dict()))
 
         with open(self.get_config_file_path(), 'r') as f:
             try:
@@ -98,12 +101,18 @@ class GroupModel(metaclass=MetaSingleton):
             f.write(self.config_file.to_json())
 
 
-class LinuxStategy(SystemStrategy):
+class PosixStategy(SystemStrategy):
     def get_config_file_path(self) -> str:
-        return f"/home/{getpass.getuser()}/.config/minecraft-mod-config.json"
+        return pathlib.Path(f"/home/{getpass.getuser()}/.config/yet-another-mod-manager/config.json")
+    
+class WindowsStrategy(SystemStrategy):
+    def get_config_file_path(self) -> str:
+        return pathlib.Path(os.getenv("APPDATA")) / ".yet-another-mod-manager" / "config.json"
 
 
 def get_group_model() -> GroupModel:
     """:returns the correct model corresponding to the platform"""
-    try: return GroupModel()
-    except TypeError: return GroupModel(LinuxStategy())
+    try: 
+        return GroupModel()
+    except TypeError: 
+        return GroupModel(PosixStategy() if platform.system() != "Windows" else WindowsStrategy())

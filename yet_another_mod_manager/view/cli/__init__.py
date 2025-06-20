@@ -94,4 +94,8 @@ def install(
 @app.command(help="Launch the graphical interface")
 def gui() -> None:
     typer.echo("Not implemented yet.")
+
+@app.command(help="Open the config file.")
+def config():
+    bulk.config()
     
