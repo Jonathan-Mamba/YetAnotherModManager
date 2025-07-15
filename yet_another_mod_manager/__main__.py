@@ -1,4 +1,4 @@
-from yet_another_mod_manager.view.cli import App
+from yet_another_mod_manager.view.cli.typer_view import App
 
 def main():
     App()()

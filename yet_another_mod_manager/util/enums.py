@@ -109,5 +109,20 @@ class ModrinthSearchIndex(enum.StrEnum):
     NEWEST = "newest"
     UPDATED = "updated"
 
+
+class Platform(enum.StrEnum):
+    MODRINTH = "modrinth"
+    CURSEFORGE = "curseforge"
+    ANY = "any"
+    OTHER = "other"
+
+
+class Channel(enum.StrEnum):
+    RELEASE = "release"
+    BETA = "beta"
+    ALPHA = "alpha"
+    ANY = "any"
+
+
 if __name__ == "__main__":
     print(ModrinthSearchIndex.NEWEST.value)
